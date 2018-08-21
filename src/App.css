@@ -1,0 +1,50 @@
+.farmer1 {
+  position: fixed;
+  left: 20px;
+  height: 80%;
+  width: 104px;
+  background: green;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.farmer2 {
+  position: fixed;
+  right: 20px;
+  height: 80%;
+  width: 104px;
+  background: green;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lord {
+  display: flex;
+  position: fixed;
+  bottom: 20px;
+  width: 80%;
+  background: green;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* #deck {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: green;
+  width: 800px;
+}
+.dragArea {
+  display: flex;
+  flex-wrap: wrap;
+}
+#deck .card {
+  margin-left: -40px;
+} */
+.farmer1-card {
+  /* transform: rotate(90deg); */
+}
+.farmer1-card-img {
+  transform: rotate(90deg);
+}
