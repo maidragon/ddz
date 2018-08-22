@@ -1,30 +1,54 @@
 .farmer1 {
-  position: fixed;
+  /* position: fixed;
   left: 20px;
   height: 80%;
   width: 104px;
   background: green;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%); */
+  position: fixed;
+  left: 275px;
+  transform: rotate(90deg);
+  transform-origin: top left;
+}
+.farmer1-cards {
+  display: -ms-flexbox;
+  display: flex;
+  margin-top: 50px;
+}
+.last-cards {
+  display: -ms-flexbox;
+  display: flex;
+  justify-content: center;
 }
 
 .farmer2 {
-  position: fixed;
+  /* position: fixed;
+  display: flex;
   right: 20px;
   height: 80%;
   width: 104px;
   background: green;
-  top: 50%;
-  transform: translateY(-50%);
+  transform: rotate(-90deg);
+  transform-origin: bottom left; */
+  position: fixed;
+  display: -ms-flexbox;
+  display: flex;
+  right: -86px;
+  bottom: 86px;
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+  -ms-transform-origin: bottom left;
 }
 
 .lord {
+  display: -ms-flexbox;
   display: flex;
   position: fixed;
   bottom: 20px;
-  width: 80%;
-  background: green;
   left: 50%;
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
   transform: translateX(-50%);
 }
 /* #deck {
@@ -42,9 +66,12 @@
 #deck .card {
   margin-left: -40px;
 } */
+.card {
+  margin-left: -40px;
+}
 .farmer1-card {
   /* transform: rotate(90deg); */
 }
 .farmer1-card-img {
-  transform: rotate(90deg);
+  /* transform: rotate(90deg); */
 }
