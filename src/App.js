@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
+import Button from './button'
 import './App.css'
 
 export default class App extends Component {
 
   state = {
     farmer1Cards: [
-      { id: 5, value: 0x13, image: "./Atlas/ClubThree.png" },
-      { id: 17, value: 0x24, image: "./Atlas/DiamondFour.png" },
-      { id: 18, value: 0x25, image: "./Atlas/DiamondFive.png" },
-      { id: 10, value: 0x1A, image: "./Atlas/ClubTen.png" },
-      { id: 7, value: 0x17, image: "./Atlas/ClubSeven.png" },
-      { id: 8, value: 0x18, image: "./Atlas/ClubEight.png" },
-      { id: 9, value: 0x19, image: "./Atlas/ClubNine.png" },
-      { id: 10, value: 0x1A, image: "./Atlas/ClubTen.png" },
+      { id: 42, value: 0x43, image: "./Atlas/SpadeThree.png", weight: 50, },
+      { id: 5, value: 0x15, image: "./Atlas/ClubFive.png", weight: 55, },
+      { id: 37, value: 0x3B, image: "./Atlas/HeartJack.png", weight: 81, },
+      { id: 39, value: 0x3D, image: "./Atlas/HeartKing.png", weight: 89, },
+      { id: 53, value: 0x4E, image: "./Atlas/SpadeOne.png", weight: 94, },
+      { id: 6, value: 0x16, image: "./Atlas/ClubSix.png", weight: 59, },
+      { id: 7, value: 0x17, image: "./Atlas/ClubSeven.png", weight: 63, },
+      { id: 8, value: 0x18, image: "./Atlas/ClubEight.png", weight: 67, },
+      { id: 48, value: 0x49, image: "./Atlas/SpadeNine.png", weight: 74, },
+      { id: 49, value: 0x4A, image: "./Atlas/SpadeTen.png", weight: 78, },
+      { id: 32, value: 0x36, image: "./Atlas/HeartSix.png", weight: 61, },
+      { id: 44, value: 0x45, image: "./Atlas/SpadeFive.png", weight: 58, },
+      { id: 10, value: 0x1A, image: "./Atlas/ClubTen.png", weight: 75, },
+      { id: 28, value: 0x2F, image: "./Atlas/DiamondTwo.png", weight: 96, },
     ],
     farmer2Cards: [
       { id: 5, value: 0x13, image: "./Atlas/ClubThree.png" },
@@ -28,7 +35,6 @@ export default class App extends Component {
       { id: 31, value: 0x35, image: "./Atlas/HeartFive.png" },
       { id: 32, value: 0x36, image: "./Atlas/HeartSix.png" },
       { id: 10, value: 0x1A, image: "./Atlas/ClubTen.png" },
-      
     ],
     lordCards: [
       { id: 5, value: 0x13, image: "./Atlas/ClubThree.png" },
@@ -45,16 +51,31 @@ export default class App extends Component {
   }
 
   renderLordCards = (lordCards) => {
-    return lordCards.map((card) => {
-      return (
-        <div className="card">
-          <img src={card.image} />
-        </div>
-      )
-    })
+    return (
+      <div className="lord-cards">
+        {lordCards.map((card) => {
+          return (
+            <div className="card">
+              <img src={card.image} />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  renderButton() {
+    return (
+      <div className="lord-buttons">
+        <Button>智能出牌</Button>
+      </div>
+    )
   }
 
   renderFarmer1Cards = (farmer1Cards) => {
+    farmer1Cards = farmer1Cards.sort((item1, item2) => {
+      return item2.weight - item1.weight;
+    })
     return (
       <div className="farmer1-cards">
         {farmer1Cards.map((card) => {
@@ -104,6 +125,8 @@ export default class App extends Component {
           {this.renderFarmer2Cards(farmer2Cards)}
         </div>
         <div className="lord">
+
+          {this.renderButton()}
           {this.renderLordCards(lordCards)}
         </div>
         

@@ -43,13 +43,18 @@
 
 .lord {
   display: -ms-flexbox;
-  display: flex;
   position: fixed;
   bottom: 20px;
   left: 50%;
   -webkit-transform: translateX(-50%);
   -ms-transform: translateX(-50%);
   transform: translateX(-50%);
+}
+.lord-cards {
+  display: flex;
+}
+.lord-buttons {
+  margin-bottom: 15px;
 }
 /* #deck {
   position: absolute;
