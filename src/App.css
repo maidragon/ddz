@@ -1,46 +1,52 @@
+@import '~antd/dist/antd.css';
+
+#root {
+  height: 100vh;
+}
+.app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
 .farmer1 {
-  /* position: fixed;
-  left: 20px;
-  height: 80%;
-  width: 104px;
-  background: green;
-  top: 50%;
-  transform: translateY(-50%); */
   position: fixed;
-  left: 275px;
-  transform: rotate(90deg);
-  transform-origin: top left;
+  display: -ms-flexbox;
+  right: -86px;
+  bottom: 86px;
+  transform: rotate(-90deg);
+}
+.farmer1-buttons {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }
 .farmer1-cards {
   display: -ms-flexbox;
   display: flex;
-  margin-top: 50px;
+  margin-top: 10px;
 }
 .last-cards {
-  display: -ms-flexbox;
+  position: relative;
   display: flex;
   justify-content: center;
 }
 
 .farmer2 {
-  /* position: fixed;
-  display: flex;
-  right: 20px;
-  height: 80%;
-  width: 104px;
-  background: green;
-  transform: rotate(-90deg);
-  transform-origin: bottom left; */
   position: fixed;
-  display: -ms-flexbox;
-  display: flex;
-  right: -86px;
-  bottom: 86px;
-  -ms-transform: rotate(-90deg);
-  transform: rotate(-90deg);
-  -ms-transform-origin: bottom left;
+  transform: rotate(90deg);
+  transform-origin: top left;
 }
-
+.farmer2-buttons {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+.farmer2-cards {
+  display: flex;
+}
 .lord {
   display: -ms-flexbox;
   position: fixed;
@@ -54,6 +60,14 @@
   display: flex;
 }
 .lord-buttons {
+  position: relative;
+  margin-bottom: 15px;
+  justify-content: center;
+  display: flex;
+}
+.deck-cards {
+  display: flex;
+  justify-content: center;
   margin-bottom: 15px;
 }
 /* #deck {
@@ -72,11 +86,76 @@
   margin-left: -40px;
 } */
 .card {
+  z-index: 1;
   margin-left: -40px;
+  transition: all .2s ease;
+}
+.card.selected {
+  transform: translateY(-20px);
 }
 .farmer1-card {
   /* transform: rotate(90deg); */
 }
 .farmer1-card-img {
   /* transform: rotate(90deg); */
+}
+.small-margin-right {
+  margin-right: 10px;
+}
+.current-player-cards {
+  display: flex;
+  justify-content: center;
+}
+.farmer2-identity {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+}
+.farmer1-identity {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+}
+.lord-identity {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+}
+.last-identity {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+}
+.last {
+  position: fixed;
+  top: 20px;
+}
+.last-player-hint {
+  position: relative;
+  color: white;
+}
+.farmer1-last-cards {
+  display: flex;
+  justify-content: center;
+}
+.farmer2-last-cards {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.decks-cards {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.deck {
+  cursor: pointer;
 }
