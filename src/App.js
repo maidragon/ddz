@@ -16,10 +16,10 @@ export default class App extends Component {
     lordCards: [],
     lastCards: [],
     deckCards: [],
-    currentPlayerCards: [],
+    lordLastCards: [],
     lastIdentity: "请选择",
     loadedDecks: [],
-    showButtons: [true, true, true],
+    showButtons: [false, false, false],
   }
 
   deck = [
@@ -135,7 +135,7 @@ export default class App extends Component {
   }
 
   onSmartFarmer1Cards = (e) => {
-    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, farmer1LastCards } = this.state;
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, farmer1LastCards, deckCards } = this.state;
     
     let lastPlayerIdentity = 0;
     switch(lastIdentity) {
@@ -157,8 +157,10 @@ export default class App extends Component {
       if (handcard.length === 0) {
         alert("没有要出的手牌");
       } else {
+        const hasFarmer1LastCards = farmer1LastCards.length > 0;
         const selectedCards = farmer1Cards.filter((card) => handcard.includes(card.id));
         this.setState({
+          deckCards: hasFarmer1LastCards ? deckCards.concat(farmer1LastCards) : deckCards,
           farmer1Cards: farmer1Cards.filter((card) => !handcard.includes(card.id)),
           farmer1LastCards: selectedCards,
         });
@@ -170,7 +172,7 @@ export default class App extends Component {
   }
 
   onSmartFarmer2Cards = (e) => {
-    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, farmer2LastCards } = this.state;
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, farmer2LastCards, deckCards } = this.state;
     
     let lastPlayerIdentity = 0;
     switch(lastIdentity) {
@@ -192,8 +194,10 @@ export default class App extends Component {
       if (handcard.length === 0) {
         alert("没有要出的手牌");
       } else {
+        const hasFarmer2LastCards = farmer2LastCards.length > 0;
         const selectedCards = farmer2Cards.filter((card) => handcard.includes(card.id));
         this.setState({
+          deckCards: hasFarmer2LastCards ? deckCards.concat(farmer2LastCards) : deckCards,
           farmer2Cards: farmer2Cards.filter((card) => !handcard.includes(card.id)),
           farmer2LastCards: selectedCards,
         });
@@ -205,7 +209,7 @@ export default class App extends Component {
   }
 
   onSmartLordCards = (e) => {
-    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity } = this.state;
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
     
     let lastPlayerIdentity = 0;
     switch(lastIdentity) {
@@ -227,10 +231,12 @@ export default class App extends Component {
       if (handcard.length === 0) {
         alert("没有要出的手牌");
       } else {
+        const hasLordLastCards = lordLastCards.length > 0;
         const selectedCards = lordCards.filter((card) => handcard.includes(card.id));
         this.setState({
+          deckCards: hasLordLastCards ? deckCards.concat(lordLastCards) : deckCards,
           lordCards: lordCards.filter((card) => !handcard.includes(card.id)),
-          currentPlayerCards: selectedCards,
+          lordLastCards: selectedCards,
         });
       }
     })
@@ -239,11 +245,11 @@ export default class App extends Component {
     });
   }
 
-  onRedrawCurrentPlayerCards = (e) => {
-    const { lordCards, currentPlayerCards } = this.state;
+  onRedrawLordCards = (e) => {
+    const { lordCards, lordLastCards } = this.state;
     this.setState({
-      currentPlayerCards: [],
-      lordCards: lordCards.concat(currentPlayerCards),
+      lordLastCards: [],
+      lordCards: lordCards.concat(lordLastCards),
     });
   }
 
@@ -288,10 +294,19 @@ export default class App extends Component {
   }
 
   onPutDeckToLastCards = (e) => {
-    const { deckCards, lastCards } = this.state;
+    const { deckCards, lastCards, lastIdentity } = this.state;
     const selectedDeckCards = deckCards.filter((card) => card.selected);
+    let showButtons = [false, false, false];
 
+    if (deckCards.length > 0 && lastIdentity !== '请选择') {
+      switch(lastIdentity) {
+        case 'lord': showButtons = [true, false, false]; break;
+        case 'farmer1': showButtons = [false, true, false]; break;
+        case 'farmer2': showButtons = [false, false, true]; break;
+      }
+    }
     this.setState({
+      showButtons,
       deckCards: deckCards.filter((card) => !card.selected),
       lastCards: lastCards.concat(selectedDeckCards.map((card) => {card.selected = false; return card;})),
     });
@@ -315,8 +330,27 @@ export default class App extends Component {
     });
   }
 
+  onPutLastCardsToDeck = () => {
+    const { lastCards, deckCards } = this.state;
+    const selectedLastCards = lastCards.filter((card) => card.selected);
+    this.setState({ 
+      lastCards: lastCards.filter((card) => !card.selected),
+      deckCards: deckCards.concat(selectedLastCards.map((card) => {card.selected = false; return card;})),
+      showButtons: [false, false, false],
+    });
+  }
+
+  onPutAllLastCardsToDeck = () => {
+    const { lastCards, deckCards } = this.state;
+    this.setState({ 
+      lastCards: [],
+      deckCards: deckCards.concat(lastCards),
+      showButtons: [false, false, false],
+    });
+  }
+
   onDealLordCards = () => {
-    const { farmer1Cards, farmer1LastCards, lastCards, farmer2Cards, farmer2LastCards, currentPlayerCards, lordCards } = this.state;
+    const { farmer1Cards, farmer1LastCards, lastCards, farmer2Cards, farmer2LastCards, lordLastCards, lordCards } = this.state;
     const selectedLordCards = lordCards.filter((card) => card.selected);
 
     if (lastCards.length > 0) {
@@ -326,17 +360,17 @@ export default class App extends Component {
       }, () => {
         this.setState({ 
           lordCards: lordCards.filter((card) => !card.selected),
-          currentPlayerCards: currentPlayerCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
+          lordLastCards: lordLastCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
           lastIdentity: "Lord",
-          lastCards: currentPlayerCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
+          lastCards: lordLastCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
         });
       });
     } else {
       this.setState({ 
         lordCards: lordCards.filter((card) => !card.selected),
-        currentPlayerCards: currentPlayerCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
+        lordLastCards: lordLastCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
         lastIdentity: "Lord",
-        lastCards: currentPlayerCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
+        lastCards: lordLastCards.concat(selectedLordCards.map((card) => {card.selected = false; return card;})),
       });
     }
   }
@@ -395,8 +429,6 @@ export default class App extends Component {
     const { farmer1Cards, farmer1LastCards } = this.state;
 
     this.setState({
-      lastIdentity: "",
-      lastCards: [],
       farmer1LastCards: [],
       farmer1Cards: farmer1Cards.concat(farmer1LastCards),
     });
@@ -406,8 +438,6 @@ export default class App extends Component {
     const { farmer2Cards, farmer2LastCards } = this.state;
 
     this.setState({
-      lastIdentity: "",
-      lastCards: [],
       farmer2LastCards: [],
       farmer2Cards: farmer2Cards.concat(farmer2LastCards),
     });
@@ -461,8 +491,15 @@ export default class App extends Component {
     this.setState({ deckCards: [...deckCards] });
   }
 
+  onSelectLastCard = (card) => {
+    const { lastCards } = this.state;
+    card.selected = !card.selected;
+
+    this.setState({ lastCards: [...lastCards] });
+  }
+
   onSelectIdentity = ({ key }) => {
-    this.setState({ lastIdentity: key })
+    this.setState({ lastIdentity: key, showButtons: [true, true, true] })
   }
 
   onSelectDeck = (deck) => {
@@ -493,14 +530,13 @@ export default class App extends Component {
       lastCards,
       lastIdentity,
       showButtons,
+      deckCards: [],
     });
   }
 
   getRandomDeck() {
     const { loadedDecks } = this.state;
-    console.log('loadedDecks: ', loadedDecks);
     const index = getRandomIntInclusive(1, loadedDecks.length);
-    console.log('index: ', index);
     const deck = loadedDecks[index - 1];
     this.loadDeck(deck);
   }
@@ -512,44 +548,51 @@ export default class App extends Component {
   }
 
   renderLordButtons() {
-    const { showButtons } = this.state;
+    const { showButtons, lordLastCards, lordCards } = this.state;
     const showSmartPushButton = showButtons[0];
+    const showPutLordCardsToDeckButton = lordCards.filter((card) => card.selected).length > 0;
+    const showRedrawLoadCardsButton = lordLastCards.length > 0;
     return (
       <div className="lord-buttons">
         <img className="lord-identity" src="./Atlas/Identity_Landlord.png" />
-        <Button onClick={this.onDealLordCards} className="small-margin-right">出牌</Button>
+        <Button onClick={this.onDealLordCards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
         <Button onClick={this.onSmartLordCards} className="small-margin-right" style={{ display: showSmartPushButton ? 'block': 'none' }}>智能出牌</Button>
-        <Button onClick={this.onRedrawCurrentPlayerCards} className="small-margin-right">放回手牌</Button>
-        <Button onClick={this.onPutToDeck} className="small-margin-right">放回牌堆</Button>
-        <Button onClick={this.onSortCards}>排序</Button>
+        <Button onClick={this.onRedrawLordCards} className="small-margin-right" style={{ display: showRedrawLoadCardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
+        <Button onClick={this.onPutToDeck} className="small-margin-right" style={{ display: showPutLordCardsToDeckButton ? 'inline-block' : 'none' }}>放回牌堆</Button>
+        <Button onClick={this.onSortCards}>一键排序</Button>
       </div>
     )
   }
 
   renderFarmer1Buttons() {
-    const { showButtons } = this.state;
+    const { showButtons, farmer1LastCards, farmer1Cards } = this.state;
     const showSmartPushButton = showButtons[1];
+    const showPutFarmer1CardsToDeckButton = farmer1Cards.filter((card) => card.selected).length > 0;
+    const showRedrawFarmer1CardsButton = farmer1LastCards.length > 0;
     return (
       <div className="farmer1-buttons">
         <img className="farmer1-identity" src="./Atlas/Identity_Farmer.png" />
-        <Button onClick={this.onDealFarmer1Cards} className="small-margin-right">出牌</Button>
+        <Button onClick={this.onDealFarmer1Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
         <Button onClick={this.onSmartFarmer1Cards} className="small-margin-right" style={{ display: showSmartPushButton ? 'block': 'none' }}>智能出牌</Button>
-        <Button onClick={this.onRedrawFarmer1Cards} className="small-margin-right">放回手牌</Button>
-        <Button onClick={this.onPutFarmer1CardsToDeck}>放回牌堆</Button>
+        <Button onClick={this.onRedrawFarmer1Cards} className="small-margin-right" style={{ display: showRedrawFarmer1CardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
+        <Button onClick={this.onPutFarmer1CardsToDeck} style={{ visibility: showPutFarmer1CardsToDeckButton ? 'visible' : 'hidden' }}>放回牌堆</Button>
       </div>
     )
   }
 
   renderFarmer2Buttons() {
-    const { showButtons } = this.state;
+    const { showButtons, farmer2LastCards, farmer2Cards } = this.state;
     const showSmartPushButton = showButtons[2];
+    const showPutFarmer2CardsToDeckButton = farmer2Cards.filter((card) => card.selected).length > 0;
+    console.log('showPutFarmer2CardsToDeckButton: ', showPutFarmer2CardsToDeckButton);
+    const showRedrawFarmer2CardsButton = farmer2LastCards.length > 0;
     return (
       <div className="farmer2-buttons">
         <img className="farmer2-identity" src="./Atlas/Identity_Farmer.png" />
-        <Button onClick={this.onDealFarmer2Cards} className="small-margin-right">出牌</Button>
+        <Button onClick={this.onDealFarmer2Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
         <Button onClick={this.onSmartFarmer2Cards} className="small-margin-right" style={{ display: showSmartPushButton ? 'block': 'none' }}>智能出牌</Button>
-        <Button onClick={this.onRedrawFarmer2Cards} className="small-margin-right">放回手牌</Button>
-        <Button onClick={this.onPutFarmer2CardsToDeck}>放回牌堆</Button>
+        <Button onClick={this.onRedrawFarmer2Cards} className="small-margin-right" style={{ display: showRedrawFarmer2CardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
+        <Button onClick={this.onPutFarmer2CardsToDeck} style={{ visibility: showPutFarmer2CardsToDeckButton ? 'visible' : 'hidden' }}>放回牌堆</Button>
       </div>
     )
   }
@@ -566,6 +609,21 @@ export default class App extends Component {
         </div>
       )
     }
+  }
+
+  renderLastCardsButtons() {
+    const { lastCards } = this.state;
+    const showPutLastCardsToDecksButton = lastCards.filter((card) => card.selected).length > 0;
+    console.log('showPutLastCardsToDecksButton: ', showPutLastCardsToDecksButton);
+    if (lastCards.length > 0) {
+      return (
+        <div className="last-cards-buttons">
+          <Button onClick={this.onPutLastCardsToDeck} className="small-margin-right" style={{ display: showPutLastCardsToDecksButton ? 'inline-block' : 'none'}}>放回牌堆</Button>
+          <Button onClick={this.onPutAllLastCardsToDeck}>全部放回牌堆</Button>
+        </div>
+      )
+    } 
+    return null;
   }
 
   renderFarmer1Cards = (farmer1Cards) => {
@@ -681,11 +739,13 @@ export default class App extends Component {
 
   renderLastCards() {
     const { lastCards } = this.state;
+
     return (
       <div className="last-cards">
         {lastCards.map((card) => {
+          const selectedClass = card.selected ? 'selected' : '';
           return (
-            <div className="last-card card">
+            <div className={`card last-card ${selectedClass}`} onClick={(e) => this.onSelectLastCard(card)}>
               <img className="last-card-img" src={card.image} />
             </div>
           )
@@ -694,10 +754,10 @@ export default class App extends Component {
     );
   }
 
-  renderCurrentCards = (currentPlayerCards) => {
+  renderCurrentCards = (lordLastCards) => {
     return (
       <div className="current-player-cards">
-        {currentPlayerCards.map((card) => {
+        {lordLastCards.map((card) => {
           return (
             <div className="current-player-card card">
               <img className="current-player-card-img" src={card.image} />
@@ -724,7 +784,7 @@ export default class App extends Component {
   }
 
   render() {
-    const { lordCards, farmer1Cards, farmer2Cards, lastCards, deckCards, currentPlayerCards, farmer1LastCards, farmer2LastCards, loadedDecks } = this.state;
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, deckCards, lordLastCards, farmer1LastCards, farmer2LastCards, loadedDecks } = this.state;
     return (
       <div className="app">
         <div className="farmer2" style={{ top: window.innerHeight / 2 - 21 * farmer2Cards.length, left: farmer2LastCards.length > 0 ? 298 : 190 }}>
@@ -738,7 +798,7 @@ export default class App extends Component {
           {this.renderFarmer1Cards(farmer1Cards)}
         </div>
         <div className="lord">
-          {this.renderCurrentCards(currentPlayerCards)}
+          {this.renderCurrentCards(lordLastCards)}
           {this.renderLordButtons()}
           {this.renderLordCards(lordCards)}
         </div>
@@ -751,8 +811,8 @@ export default class App extends Component {
           <div className="last-cards-zone">
             {this.renderLastIdentity()}
             {this.renderLastCards()}
+            {this.renderLastCardsButtons()}
           </div>
-          
         </div>
       </div>
     )
