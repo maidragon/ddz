@@ -531,6 +531,9 @@ export default class App extends Component {
       lastIdentity,
       showButtons,
       deckCards: [],
+      farmer1LastCards: [],
+      farmer2LastCards: [],
+      lordLastCards: [],
     });
   }
 
