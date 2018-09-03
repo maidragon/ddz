@@ -153,7 +153,11 @@ export default class App extends Component {
     })
     .then((response) => {
       const { data } = response;
-      const { handcard } = data;
+      const { handcard, status } = data;
+      if (!status) {
+        alert('接口调用失败');
+        return;
+      }
       if (handcard.length === 0) {
         alert("没有要出的手牌");
       } else {
@@ -190,7 +194,11 @@ export default class App extends Component {
     })
     .then((response) => {
       const { data } = response;
-      const { handcard } = data;
+      const { handcard, status } = data;
+      if (!status) {
+        alert('接口调用失败');
+        return;
+      }
       if (handcard.length === 0) {
         alert("没有要出的手牌");
       } else {
@@ -227,7 +235,11 @@ export default class App extends Component {
     })
     .then((response) => {
       const { data } = response;
-      const { handcard } = data;
+      const { handcard, status } = data;
+      if (!status) {
+        alert('接口调用失败');
+        return;
+      }
       if (handcard.length === 0) {
         alert("没有要出的手牌");
       } else {
@@ -467,7 +479,6 @@ export default class App extends Component {
     card.selected = !card.selected;
 
     this.setState({ lordCards: [...lordCards] });
-    // console.log('onSelectCard: ');
   }
 
   onSelectFarmer1Card = (card) => {
@@ -587,7 +598,6 @@ export default class App extends Component {
     const { showButtons, farmer2LastCards, farmer2Cards } = this.state;
     const showSmartPushButton = showButtons[2];
     const showPutFarmer2CardsToDeckButton = farmer2Cards.filter((card) => card.selected).length > 0;
-    console.log('showPutFarmer2CardsToDeckButton: ', showPutFarmer2CardsToDeckButton);
     const showRedrawFarmer2CardsButton = farmer2LastCards.length > 0;
     return (
       <div className="farmer2-buttons">
@@ -617,7 +627,6 @@ export default class App extends Component {
   renderLastCardsButtons() {
     const { lastCards } = this.state;
     const showPutLastCardsToDecksButton = lastCards.filter((card) => card.selected).length > 0;
-    console.log('showPutLastCardsToDecksButton: ', showPutLastCardsToDecksButton);
     if (lastCards.length > 0) {
       return (
         <div className="last-cards-buttons">
