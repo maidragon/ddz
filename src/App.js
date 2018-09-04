@@ -14,10 +14,10 @@ export default class App extends Component {
     farmer2Cards: [],
     farmer2LastCards: [],
     lordCards: [],
+    lordLastCards: [],
     lastCards: [],
     deckCards: [],
-    lordLastCards: [],
-    lastIdentity: "请选择",
+    lastIdentity: "lord",
     loadedDecks: [],
     showButtons: [false, false, false],
   }
@@ -90,6 +90,11 @@ export default class App extends Component {
   ]
 
   componentDidMount() {
+    window.onresize = this.resize;
+    this.initialize();
+  }
+
+  initialize = () => {
     // 读取预设好的牌组
     this.loadDecks();
     this.dealCards();
@@ -97,6 +102,21 @@ export default class App extends Component {
     setTimeout(() => {
       this.sortCards();
     }, 1000);
+  }
+
+  resize = () => {
+    const { farmer1Cards, farmer1LastCards, farmer2Cards, farmer2LastCards, lordCards, lordLastCards, deckCards, lastCards } = this.state;
+
+    this.setState({
+      farmer1Cards: [...farmer1Cards],
+      farmer1LastCards: [...farmer1LastCards],
+      farmer2Cards: [...farmer2Cards],
+      farmer2LastCards: [...farmer2LastCards],
+      lordCards: [...lordCards],
+      lordLastCards: [...lordLastCards],
+      lastCards: [...lastCards],
+      deckCards: [...deckCards],
+    })
   }
 
   loadDecks() {
@@ -570,7 +590,7 @@ export default class App extends Component {
       <div className="lord-buttons">
         <img className="lord-identity" src="./Atlas/Identity_Landlord.png" />
         <Button onClick={this.onDealLordCards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
-        <Button onClick={this.onSmartLordCards} className="small-margin-right" style={{ display: showSmartPushButton ? 'block': 'none' }}>智能出牌</Button>
+        <Button onClick={this.onSmartLordCards} className="small-margin-right">智能出牌</Button>
         <Button onClick={this.onRedrawLordCards} className="small-margin-right" style={{ display: showRedrawLoadCardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
         <Button onClick={this.onPutToDeck} className="small-margin-right" style={{ display: showPutLordCardsToDeckButton ? 'inline-block' : 'none' }}>放回牌堆</Button>
         <Button onClick={this.onSortCards}>一键排序</Button>
@@ -587,7 +607,7 @@ export default class App extends Component {
       <div className="farmer1-buttons">
         <img className="farmer1-identity" src="./Atlas/Identity_Farmer.png" />
         <Button onClick={this.onDealFarmer1Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
-        <Button onClick={this.onSmartFarmer1Cards} className="small-margin-right" style={{ display: showSmartPushButton ? 'block': 'none' }}>智能出牌</Button>
+        <Button onClick={this.onSmartFarmer1Cards} className="small-margin-right">智能出牌</Button>
         <Button onClick={this.onRedrawFarmer1Cards} className="small-margin-right" style={{ display: showRedrawFarmer1CardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
         <Button onClick={this.onPutFarmer1CardsToDeck} style={{ visibility: showPutFarmer1CardsToDeckButton ? 'visible' : 'hidden' }}>放回牌堆</Button>
       </div>
@@ -603,7 +623,7 @@ export default class App extends Component {
       <div className="farmer2-buttons">
         <img className="farmer2-identity" src="./Atlas/Identity_Farmer.png" />
         <Button onClick={this.onDealFarmer2Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
-        <Button onClick={this.onSmartFarmer2Cards} className="small-margin-right" style={{ display: showSmartPushButton ? 'block': 'none' }}>智能出牌</Button>
+        <Button onClick={this.onSmartFarmer2Cards} className="small-margin-right">智能出牌</Button>
         <Button onClick={this.onRedrawFarmer2Cards} className="small-margin-right" style={{ display: showRedrawFarmer2CardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
         <Button onClick={this.onPutFarmer2CardsToDeck} style={{ visibility: showPutFarmer2CardsToDeckButton ? 'visible' : 'hidden' }}>放回牌堆</Button>
       </div>

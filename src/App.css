@@ -71,6 +71,10 @@
   justify-content: center;
   margin-bottom: 15px;
 }
+.deck-buttons {
+  display: flex;
+  justify-content: center;
+}
 /* #deck {
   position: absolute;
   left: 50%;
