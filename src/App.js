@@ -542,6 +542,7 @@ export default class App extends Component {
     const farmer2Cards = this.deck.filter((card) => deck.f2.includes(card.id));
     const lordCards = this.deck.filter((card) => deck.l.includes(card.id));
     const lastCards = this.deck.filter((card) => deck.lastCard.includes(card.id));
+    const deckCards = this.deck.filter((card) => !deck.f1.includes(card.id) && !deck.f2.includes(card.id) && !deck.l.includes(card.id) && !deck.lastCard.includes(card.id));
     let lastIdentity = "lord";
     switch (deck.Last_Identity) {
       case 1: lastIdentity = "farmer1"; break;
@@ -561,7 +562,7 @@ export default class App extends Component {
       lastCards,
       lastIdentity,
       showButtons,
-      deckCards: [],
+      deckCards,
       farmer1LastCards: [],
       farmer2LastCards: [],
       lordLastCards: [],
