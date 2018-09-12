@@ -20,6 +20,7 @@ export default class App extends Component {
     lastIdentity: "lord",
     loadedDecks: [],
     showButtons: [false, false, false],
+    snapshots: [],
   }
 
   deck = [
@@ -153,6 +154,35 @@ export default class App extends Component {
       farmer2Cards,
     });
   }
+
+  onNextSnapshot = () => {
+    const { snapshots } = this.state;
+    if (snapshots.length === 0) {
+      alert("没有下一步了");
+    } else {
+      const snapshot = snapshots[0];
+      this.generateDeckBySnapshot(snapshot);
+    }
+  }
+
+  generateDeckBySnapshot(snapshot) {
+    console.log('snapshot: ', snapshot);
+    const identityMaps = {
+      "0": "lord",
+      "1": "farmer1",
+      "2": "farmer2",
+    };
+    const { farmer1_handcard, farmer2_handcard, last_identity, last_playcard, lord_handcard, player_identity } = snapshot;
+    this.setState({
+      farmer1Cards: this.reformatCards(farmer1_handcard),
+      farmer2Cards: this.reformatCards(farmer2_handcard),
+      lastIdentity: identityMaps[last_identity],
+      lastCards: this.reformatCards(last_playcard),
+      lordCards: this.reformatCards(lord_handcard),
+      currentIdentity: identityMaps[player_identity],
+    });
+  }
+
 
   onSmartFarmer1Cards = (e) => {
     const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, farmer1LastCards, deckCards } = this.state;
@@ -569,6 +599,43 @@ export default class App extends Component {
     });
   }
 
+  onPlayDecks = () => {
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
+    
+    let lastPlayerIdentity = 0;
+    switch(lastIdentity) {
+      case 'farmer1': lastPlayerIdentity = 1; break;
+      case 'farmer2': lastPlayerIdentity = 2; break;
+    }
+
+    axios.post(config.GAME_TABLE_URL, {
+      lordCards: this.formatCards(lordCards),
+      farmer1Cards: this.formatCards(farmer1Cards),
+      farmer2Cards: this.formatCards(farmer2Cards),
+      lastPlayerCards: this.formatCards(lastCards),
+      playerIdentity: 0,
+      lastPlayerIdentity: lastPlayerIdentity,
+    })
+    .then((response) => {
+      const { data } = response;
+      console.log('data: ', data);
+      const { snapshots, status } = data;
+      if (!status) {
+        alert('接口调用失败');
+        return;
+      }
+      if (snapshots.length === 0) {
+        alert("没有自动生成的牌组");
+      } else {
+        console.log('snapshots: ', snapshots);
+        this.setState({ snapshots });
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+
   getRandomDeck() {
     const { loadedDecks } = this.state;
     const index = getRandomIntInclusive(1, loadedDecks.length);
@@ -582,6 +649,10 @@ export default class App extends Component {
     });
   }
 
+  reformatCards(cards) {
+    return this.deck.filter((card) => cards.includes(card.id));
+  }
+
   renderLordButtons() {
     const { showButtons, lordLastCards, lordCards } = this.state;
     const showSmartPushButton = showButtons[0];
@@ -591,6 +662,8 @@ export default class App extends Component {
       <div className="lord-buttons">
         <img className="lord-identity" src="./Atlas/Identity_Landlord.png" />
         <Button onClick={this.onDealLordCards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
+        <Button onClick={this.onNextSnapshot} className="small-margin-right">下一步</Button>
+        <Button onClick={this.onPlayDecks} className="small-margin-right">Play</Button>
         <Button onClick={this.onSmartLordCards} className="small-margin-right">智能出牌</Button>
         <Button onClick={this.onRedrawLordCards} className="small-margin-right" style={{ display: showRedrawLoadCardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
         <Button onClick={this.onPutToDeck} className="small-margin-right" style={{ display: showPutLordCardsToDeckButton ? 'inline-block' : 'none' }}>放回牌堆</Button>
