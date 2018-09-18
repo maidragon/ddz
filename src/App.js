@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Menu, Dropdown, Icon } from 'antd';
+import { Menu, Dropdown, Icon, Pagination } from 'antd';
 import { shuffle, getRandomIntInclusive } from './tool'
 import { config } from './config'
 import Button from './button'
@@ -24,6 +24,8 @@ export default class App extends Component {
     showButtons: [false, false, false],
     snapshots: [],
     isViewMode: false,
+    totalSnapshots: 1,
+    currentSnapshotIndex: 1,
   }
 
   deck = [
@@ -175,7 +177,8 @@ export default class App extends Component {
       alert("没有上一步了");
     } else {
       const lastSnapshot = snapshots[this.currentSnapshotIndex];
-      this.generateDeckBySnapshot(snapshot);
+      this.setState({ currentSnapshotIndex: this.currentSnapshotIndex });
+      this.generateDeckBySnapshot(lastSnapshot);
     }
   }
 
@@ -184,6 +187,7 @@ export default class App extends Component {
     if (snapshots.length === 0 || this.currentSnapshotIndex === snapshots.length) {
       alert("没有下一步了");
     } else {
+      this.setState({ currentSnapshotIndex: this.currentSnapshotIndex });
       const snapshot = snapshots[this.currentSnapshotIndex];
       this.generateDeckBySnapshot(snapshot);
       this.currentSnapshotIndex++;
@@ -700,8 +704,7 @@ export default class App extends Component {
       if (snapshots.length === 0) {
         alert("没有自动生成的牌组");
       } else {
-        console.log('snapshots: ', snapshots);
-        this.setState({ snapshots });
+        this.setState({ snapshots, totalSnapshots: snapshots.length });
       }
     })
     .catch(function (error) {
@@ -752,8 +755,17 @@ export default class App extends Component {
         <Button onClick={this.onRedrawLordCards} className="small-margin-right" style={{ display: showRedrawLoadCardsButton && !isViewMode ? 'inline-block' : 'none' }}>放回手牌</Button>
         <Button onClick={this.onPutToDeck} className="small-margin-right" style={{ display: showPutLordCardsToDeckButton && !isViewMode ? 'inline-block' : 'none' }}>放回牌堆</Button>
         <Button onClick={this.onSortCards} style={{ display: isViewMode ? 'none' : 'inline-block' }}>一键排序</Button>
+        {this.renderPagination()}
       </div>
     )
+  }
+
+  renderPagination() {
+    const { isViewMode, totalSnapshots } = this.state;
+    if (isViewMode) {
+      return  <Pagination simple defaultCurrent={1} total={totalSnapshots} pageSize={1} />;
+    }
+    return null;
   }
 
   renderFarmer1Buttons() {

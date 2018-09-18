@@ -194,3 +194,13 @@
   background: gray;
   margin-right: 4px;
 }
+.ant-pagination,
+.ant-pagination-prev a, .ant-pagination-next a {
+  color: white;
+}
+.ant-pagination-simple .ant-pagination-simple-pager input {
+  background-color: #103e5f;
+}
+.ant-pagination-prev .ant-pagination-item-link, .ant-pagination-next .ant-pagination-item-link {
+  background-color: transparent;
+}
