@@ -164,3 +164,33 @@
 .deck {
   cursor: pointer;
 }
+.previous-snapshot {
+  color: white;
+  font-size: 95px;
+  position: absolute;
+  left: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.next-snapshot {
+  color: white;
+  font-size: 95px;
+  position: absolute;
+  right: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.thumbnails {
+  display: flex;
+  margin-top: 8px;
+}
+.thumbnails .thumbnail {
+  height: 70px;
+  width: 70px;
+  background: gray;
+  margin-right: 4px;
+}

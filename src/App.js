@@ -8,6 +8,8 @@ import './App.css'
 
 export default class App extends Component {
 
+  currentSnapshotIndex = 0;
+
   state = {
     farmer1Cards: [],
     farmer1LastCards: [],
@@ -21,9 +23,11 @@ export default class App extends Component {
     loadedDecks: [],
     showButtons: [false, false, false],
     snapshots: [],
+    isViewMode: false,
   }
 
   deck = [
+    // { id: 0, value: 0x00, image: "./pass.png", weight: 1000 },
     // 大王
     { id: 1, value: 0x01, image: "./Atlas/LJoker.png", weight: 100, },
     // 小王
@@ -155,32 +159,100 @@ export default class App extends Component {
     });
   }
 
-  onNextSnapshot = () => {
+  onLastSnapshot = () => {
     const { snapshots } = this.state;
-    if (snapshots.length === 0) {
-      alert("没有下一步了");
+    const currentSnapshot = snapshots[this.currentSnapshotIndex];
+    const { player_identity } = currentSnapshot;
+    switch(player_identity) {
+      case 0: this.setState({ lordLastCards: [] }); break;
+      case 1: this.setState({ farmer1LastCards: [] }); break;
+      case 2: this.setState({ farmer2LastCards: [] }); break;
+    }
+
+    this.currentSnapshotIndex--;
+
+    if (snapshots.length === 0 || this.currentSnapshotIndex < 0) {
+      alert("没有上一步了");
     } else {
-      const snapshot = snapshots[0];
+      const lastSnapshot = snapshots[this.currentSnapshotIndex];
       this.generateDeckBySnapshot(snapshot);
     }
   }
 
+  onNextSnapshot = () => {
+    const { snapshots } = this.state;
+    if (snapshots.length === 0 || this.currentSnapshotIndex === snapshots.length) {
+      alert("没有下一步了");
+    } else {
+      const snapshot = snapshots[this.currentSnapshotIndex];
+      this.generateDeckBySnapshot(snapshot);
+      this.currentSnapshotIndex++;
+    }
+  }
+
   generateDeckBySnapshot(snapshot) {
-    console.log('snapshot: ', snapshot);
     const identityMaps = {
       "0": "lord",
       "1": "farmer1",
       "2": "farmer2",
     };
-    const { farmer1_handcard, farmer2_handcard, last_identity, last_playcard, lord_handcard, player_identity } = snapshot;
+    const { farmer1_handcard, farmer2_handcard, last_identity, last_playcard, lord_handcard, player_identity, result } = snapshot;
+    const deckCards = this.deck.filter((card) => !farmer1_handcard.includes(card.id) && !farmer2_handcard.includes(card.id) && !lord_handcard.includes(card.id));
     this.setState({
-      farmer1Cards: this.reformatCards(farmer1_handcard),
-      farmer2Cards: this.reformatCards(farmer2_handcard),
+      farmer1Cards: this.reformatCards(farmer1_handcard).sort(this.sortRule),
+      farmer2Cards: this.reformatCards(farmer2_handcard).sort(this.sortRule),
       lastIdentity: identityMaps[last_identity],
-      lastCards: this.reformatCards(last_playcard),
-      lordCards: this.reformatCards(lord_handcard),
+      lastCards: this.reformatCards(last_playcard).sort(this.sortRule),
+      lordCards: this.reformatCards(lord_handcard).sort(this.sortRule),
       currentIdentity: identityMaps[player_identity],
+      deckCards: deckCards.sort(this.sortRule),
     });
+
+    let resultCards = this.reformatCards(result).sort(this.sortRule);
+    // 要不起 没有要出的牌
+    if (result.length === 0) {
+      resultCards = [{ id: 0, value: 0x00, image: "./pass.png", weight: 1000 }]
+    }
+
+    switch(player_identity) {
+      case 0: {
+        this.setState({
+          lordLastCards: this.reformatCards([]).sort(this.sortRule), 
+        });
+
+        setTimeout(() => {
+          this.setState({ 
+            lordLastCards: resultCards, 
+            lordCards: this.reformatCards(lord_handcard.filter((card) => !result.includes(card))).sort(this.sortRule) 
+          })
+        }, 300);
+        
+      }; break;
+      case 1: {
+        this.setState({
+          farmer1LastCards: this.reformatCards([]).sort(this.sortRule), 
+        });
+
+        setTimeout(() => {
+          this.setState({ 
+            farmer1LastCards: resultCards, 
+            farmer1Cards: this.reformatCards(farmer1_handcard.filter((card) => !result.includes(card))).sort(this.sortRule) 
+          });
+        }, 300);
+      }; break;
+      case 2: {
+        this.setState({
+          farmer2LastCards: this.reformatCards([]).sort(this.sortRule), 
+        });
+
+        setTimeout(() => {
+          this.setState({ 
+            farmer2LastCards: resultCards, 
+            farmer2Cards: this.reformatCards(farmer2_handcard.filter((card) => !result.includes(card))).sort(this.sortRule) 
+          });
+        }, 300);
+      }; break;
+    }
   }
 
 
@@ -586,20 +658,21 @@ export default class App extends Component {
       case 2: showButtons = [false, false, true]; break;
     }
     this.setState({
-      farmer1Cards,
-      farmer2Cards,
-      lordCards,
-      lastCards,
+      farmer1Cards: farmer1Cards.sort(this.sortRule),
+      farmer2Cards: farmer2Cards.sort(this.sortRule),
+      lordCards: lordCards.sort(this.sortRule),
+      lastCards: lastCards.sort(this.sortRule),
       lastIdentity,
       showButtons,
-      deckCards,
+      deckCards: deckCards.sort(this.sortRule),
       farmer1LastCards: [],
       farmer2LastCards: [],
       lordLastCards: [],
     });
   }
 
-  onPlayDecks = () => {
+  onEnterViewMode = () => {
+    this.setState({ isViewMode: true });
     const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
     
     let lastPlayerIdentity = 0;
@@ -636,6 +709,17 @@ export default class App extends Component {
     });
   }
 
+  onExitViewMode = () => {
+    this.currentSnapshotIndex = 0;
+    this.setState({ 
+      isViewMode: false, 
+      lastCards: [], 
+      farmer1LastCards: [], 
+      farmer2LastCards: [], 
+      lordLastCards: [],
+    });
+  }
+
   getRandomDeck() {
     const { loadedDecks } = this.state;
     const index = getRandomIntInclusive(1, loadedDecks.length);
@@ -654,7 +738,7 @@ export default class App extends Component {
   }
 
   renderLordButtons() {
-    const { showButtons, lordLastCards, lordCards } = this.state;
+    const { showButtons, lordLastCards, lordCards, isViewMode } = this.state;
     const showSmartPushButton = showButtons[0];
     const showPutLordCardsToDeckButton = lordCards.filter((card) => card.selected).length > 0;
     const showRedrawLoadCardsButton = lordLastCards.length > 0;
@@ -662,18 +746,18 @@ export default class App extends Component {
       <div className="lord-buttons">
         <img className="lord-identity" src="./Atlas/Identity_Landlord.png" />
         <Button onClick={this.onDealLordCards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
-        <Button onClick={this.onNextSnapshot} className="small-margin-right">下一步</Button>
-        <Button onClick={this.onPlayDecks} className="small-margin-right">Play</Button>
-        <Button onClick={this.onSmartLordCards} className="small-margin-right">智能出牌</Button>
-        <Button onClick={this.onRedrawLordCards} className="small-margin-right" style={{ display: showRedrawLoadCardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
-        <Button onClick={this.onPutToDeck} className="small-margin-right" style={{ display: showPutLordCardsToDeckButton ? 'inline-block' : 'none' }}>放回牌堆</Button>
-        <Button onClick={this.onSortCards}>一键排序</Button>
+        <Button onClick={this.onEnterViewMode} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>生成牌局</Button>
+        <Button onClick={this.onExitViewMode} className="small-margin-right" style={{ display: isViewMode ? 'inline-block' : 'none' }}>退出牌局</Button>
+        <Button onClick={this.onSmartLordCards} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>智能出牌</Button>
+        <Button onClick={this.onRedrawLordCards} className="small-margin-right" style={{ display: showRedrawLoadCardsButton && !isViewMode ? 'inline-block' : 'none' }}>放回手牌</Button>
+        <Button onClick={this.onPutToDeck} className="small-margin-right" style={{ display: showPutLordCardsToDeckButton && !isViewMode ? 'inline-block' : 'none' }}>放回牌堆</Button>
+        <Button onClick={this.onSortCards} style={{ display: isViewMode ? 'none' : 'inline-block' }}>一键排序</Button>
       </div>
     )
   }
 
   renderFarmer1Buttons() {
-    const { showButtons, farmer1LastCards, farmer1Cards } = this.state;
+    const { showButtons, farmer1LastCards, farmer1Cards, isViewMode } = this.state;
     const showSmartPushButton = showButtons[1];
     const showPutFarmer1CardsToDeckButton = farmer1Cards.filter((card) => card.selected).length > 0;
     const showRedrawFarmer1CardsButton = farmer1LastCards.length > 0;
@@ -681,15 +765,15 @@ export default class App extends Component {
       <div className="farmer1-buttons">
         <img className="farmer1-identity" src="./Atlas/Identity_Farmer.png" />
         <Button onClick={this.onDealFarmer1Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
-        <Button onClick={this.onSmartFarmer1Cards} className="small-margin-right">智能出牌</Button>
-        <Button onClick={this.onRedrawFarmer1Cards} className="small-margin-right" style={{ display: showRedrawFarmer1CardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
-        <Button onClick={this.onPutFarmer1CardsToDeck} style={{ visibility: showPutFarmer1CardsToDeckButton ? 'visible' : 'hidden' }}>放回牌堆</Button>
+        <Button onClick={this.onSmartFarmer1Cards} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>智能出牌</Button>
+        <Button onClick={this.onRedrawFarmer1Cards} className="small-margin-right" style={{ display: showRedrawFarmer1CardsButton && !isViewMode ? 'inline-block' : 'none' }}>放回手牌</Button>
+        <Button onClick={this.onPutFarmer1CardsToDeck} style={{ visibility: showPutFarmer1CardsToDeckButton && !isViewMode ? 'visible' : 'hidden' }}>放回牌堆</Button>
       </div>
     )
   }
 
   renderFarmer2Buttons() {
-    const { showButtons, farmer2LastCards, farmer2Cards } = this.state;
+    const { showButtons, farmer2LastCards, farmer2Cards, isViewMode } = this.state;
     const showSmartPushButton = showButtons[2];
     const showPutFarmer2CardsToDeckButton = farmer2Cards.filter((card) => card.selected).length > 0;
     const showRedrawFarmer2CardsButton = farmer2LastCards.length > 0;
@@ -697,35 +781,35 @@ export default class App extends Component {
       <div className="farmer2-buttons">
         <img className="farmer2-identity" src="./Atlas/Identity_Farmer.png" />
         <Button onClick={this.onDealFarmer2Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
-        <Button onClick={this.onSmartFarmer2Cards} className="small-margin-right">智能出牌</Button>
-        <Button onClick={this.onRedrawFarmer2Cards} className="small-margin-right" style={{ display: showRedrawFarmer2CardsButton ? 'inline-block' : 'none' }}>放回手牌</Button>
-        <Button onClick={this.onPutFarmer2CardsToDeck} style={{ visibility: showPutFarmer2CardsToDeckButton ? 'visible' : 'hidden' }}>放回牌堆</Button>
+        <Button onClick={this.onSmartFarmer2Cards} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>智能出牌</Button>
+        <Button onClick={this.onRedrawFarmer2Cards} className="small-margin-right" style={{ display: showRedrawFarmer2CardsButton && !isViewMode ? 'inline-block' : 'none' }}>放回手牌</Button>
+        <Button onClick={this.onPutFarmer2CardsToDeck} style={{ visibility: showPutFarmer2CardsToDeckButton && !isViewMode ? 'visible' : 'hidden' }}>放回牌堆</Button>
       </div>
     )
   }
 
   renderDeckButtons() {
-    const { deckCards } = this.state;
+    const { deckCards, isViewMode } = this.state;
     if (deckCards.length > 0) {
       return (
         <div className="deck-buttons">
-          <Button onClick={this.onPutToLeft} className="small-margin-right">放入左侧</Button>
-          <Button onClick={this.onPutToBottom} className="small-margin-right">放入下方</Button>
-          <Button onClick={this.onPutToRight} className="small-margin-right">放入右侧</Button>
-          <Button onClick={this.onPutDeckToLastCards} className="small-margin-right">放入上次出牌</Button>
+          <Button onClick={this.onPutToLeft} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block'}}>放入左侧</Button>
+          <Button onClick={this.onPutToBottom} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block'}}>放入下方</Button>
+          <Button onClick={this.onPutToRight} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block'}}>放入右侧</Button>
+          <Button onClick={this.onPutDeckToLastCards} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block'}}>放入上次出牌</Button>
         </div>
       )
     }
   }
 
   renderLastCardsButtons() {
-    const { lastCards } = this.state;
+    const { lastCards, isViewMode } = this.state;
     const showPutLastCardsToDecksButton = lastCards.filter((card) => card.selected).length > 0;
     if (lastCards.length > 0) {
       return (
         <div className="last-cards-buttons">
-          <Button onClick={this.onPutLastCardsToDeck} className="small-margin-right" style={{ display: showPutLastCardsToDecksButton ? 'inline-block' : 'none'}}>放回牌堆</Button>
-          <Button onClick={this.onPutAllLastCardsToDeck}>全部放回牌堆</Button>
+          <Button onClick={this.onPutLastCardsToDeck} className="small-margin-right" style={{ display: showPutLastCardsToDecksButton && !isViewMode ? 'inline-block' : 'none'}}>放回牌堆</Button>
+          <Button onClick={this.onPutAllLastCardsToDeck} style={{ display: isViewMode ? 'none' : 'inline-block'}}>全部放回牌堆</Button>
         </div>
       )
     } 
@@ -806,16 +890,31 @@ export default class App extends Component {
     )
   }
   
+  renderThumbnails = () => {
+    // const { snapshots, isViewMode } = this.state;
+    // if (isViewMode) {
+    //   return (
+    //     <div className="thumbnails">
+    //       {snapshots.map((snapshot, index) => {
+    //         return <div className="thumbnail">index</div>;
+    //       })}
+    //     </div>
+    //   )
+    // }
+    return null;
+  }
+
   renderDecks = (decks) => {
+    const { isViewMode } = this.state;
     return (
       <div className="decks-cards">
-        <Button className="" onClick={(e) => this.getRandomDeck()}>随机更换牌组</Button>
+        <Button className="" onClick={(e) => this.getRandomDeck()} style={{ display: isViewMode ? 'none' : 'inline-block'}}>随机更换牌组</Button>
       </div>
     )
   }
 
   renderLastIdentity() {
-    const { lastIdentity } = this.state;
+    const { lastIdentity, isViewMode } = this.state;
     const menu = (
       <Menu onClick={this.onSelectIdentity}>
         <Menu.Item key="farmer1">
@@ -831,6 +930,15 @@ export default class App extends Component {
     );
     // const identitySrc = lastIdentity === 'lord' ? "./Atlas/Identity_Landlord.png" : "./Atlas/Identity_Farmer.png";
     // return <img className="last-identity" src={identitySrc}/>;
+
+    if (isViewMode) {
+      return (
+        <p className="last-player-hint">
+          <span className="small-margin-right">上次玩家:</span> 
+          <span style={{ color: '#1890ff'}}>{lastIdentity}</span>
+        </p>
+      )
+    }
     return (
       <p className="last-player-hint">
         <span className="small-margin-right">上次玩家:</span> 
@@ -890,15 +998,18 @@ export default class App extends Component {
   }
 
   render() {
-    const { lordCards, farmer1Cards, farmer2Cards, lastCards, deckCards, lordLastCards, farmer1LastCards, farmer2LastCards, loadedDecks } = this.state;
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, deckCards, lordLastCards, farmer1LastCards, farmer2LastCards, loadedDecks, isViewMode } = this.state;
+    const isViewModeMargin = isViewMode ? 150 : 0;
     return (
       <div className="app">
-        <div className="farmer2" style={{ top: window.innerHeight / 2 - 21 * farmer2Cards.length, left: farmer2LastCards.length > 0 ? 298 : 190 }}>
+        <div className="previous-snapshot" onClick={this.onLastSnapshot} style={{ display: isViewMode ? 'flex' : 'none'}}>{'<'}</div>
+        <div className="next-snapshot" onClick={this.onNextSnapshot} style={{ display: isViewMode ? 'flex' : 'none'}}>{'>'}</div>
+        <div className="farmer2" style={{ top: window.innerHeight / 2 - 21 * farmer2Cards.length, left: farmer2LastCards.length > 0 ? 298 + isViewModeMargin: 190 + isViewModeMargin }}>
           {this.renderFarmer2LastCards(farmer2LastCards)}
           {this.renderFarmer2Buttons()}
           {this.renderFarmer2Cards(farmer2Cards)}
         </div>
-        <div className="farmer1" style={{ right: 54 - farmer1Cards.length * 20 + 44 + (farmer1LastCards.length > 0 ? 56 : 0), bottom: farmer1Cards.length * 20 - 14 + window.innerHeight / 2 - 21 * farmer1Cards.length }}>
+        <div className="farmer1" style={{ right: 54 - farmer1Cards.length * 20 + 44 + (farmer1LastCards.length > 0 ? 56 : 0) + isViewModeMargin, bottom: farmer1Cards.length * 20 - 14 + window.innerHeight / 2 - 21 * farmer1Cards.length }}>
           {this.renderFarmer1LastCards(farmer1LastCards)}
           {this.renderFarmer1Buttons()}
           {this.renderFarmer1Cards(farmer1Cards)}
@@ -907,6 +1018,7 @@ export default class App extends Component {
           {this.renderCurrentCards(lordLastCards)}
           {this.renderLordButtons()}
           {this.renderLordCards(lordCards)}
+          {this.renderThumbnails()}
         </div>
         <div className="deck">
           {this.renderDeck(deckCards)}
@@ -920,6 +1032,7 @@ export default class App extends Component {
             {this.renderLastCardsButtons()}
           </div>
         </div>
+        
       </div>
     )
   }
