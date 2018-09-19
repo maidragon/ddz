@@ -8,7 +8,7 @@ import './App.css'
 
 export default class App extends Component {
 
-  currentSnapshotIndex = 0;
+  currentSnapshotIndex = -1;
 
   state = {
     farmer1Cards: [],
@@ -25,7 +25,7 @@ export default class App extends Component {
     snapshots: [],
     isViewMode: false,
     totalSnapshots: 1,
-    currentSnapshotIndex: 1,
+    currentSnapshotIndex: -1,
   }
 
   deck = [
@@ -163,7 +163,13 @@ export default class App extends Component {
 
   onLastSnapshot = () => {
     const { snapshots } = this.state;
+    if (snapshots.length === 0 || this.currentSnapshotIndex <= 0) {
+      alert("没有上一步了");
+      return;
+    }
+
     const currentSnapshot = snapshots[this.currentSnapshotIndex];
+    console.log('this.currentSnapshotIndex', this.currentSnapshotIndex, 'currentSnapshot: ', currentSnapshot);
     const { player_identity } = currentSnapshot;
     switch(player_identity) {
       case 0: this.setState({ lordLastCards: [] }); break;
@@ -172,26 +178,27 @@ export default class App extends Component {
     }
 
     this.currentSnapshotIndex--;
-
-    if (snapshots.length === 0 || this.currentSnapshotIndex < 0) {
-      alert("没有上一步了");
-    } else {
-      const lastSnapshot = snapshots[this.currentSnapshotIndex];
-      this.setState({ currentSnapshotIndex: this.currentSnapshotIndex });
-      this.generateDeckBySnapshot(lastSnapshot);
-    }
+    const lastSnapshot = snapshots[this.currentSnapshotIndex];
+    this.setState({ currentSnapshotIndex: this.currentSnapshotIndex });
+    this.generateDeckBySnapshot(lastSnapshot);
   }
 
   onNextSnapshot = () => {
     const { snapshots } = this.state;
-    if (snapshots.length === 0 || this.currentSnapshotIndex === snapshots.length) {
+    if (snapshots.length === 0 || this.currentSnapshotIndex === snapshots.length - 1) {
       alert("没有下一步了");
     } else {
+      this.currentSnapshotIndex++;
       this.setState({ currentSnapshotIndex: this.currentSnapshotIndex });
       const snapshot = snapshots[this.currentSnapshotIndex];
       this.generateDeckBySnapshot(snapshot);
-      this.currentSnapshotIndex++;
     }
+  }
+
+  generateDeckWithPage(page) {
+    const { snapshots } = this.state;
+    const snapshot = snapshots[page - 1];
+    this.generateDeckBySnapshot(snapshot);
   }
 
   generateDeckBySnapshot(snapshot) {
@@ -221,7 +228,7 @@ export default class App extends Component {
     switch(player_identity) {
       case 0: {
         this.setState({
-          lordLastCards: this.reformatCards([]).sort(this.sortRule), 
+          lordLastCards: [], 
         });
 
         setTimeout(() => {
@@ -234,7 +241,7 @@ export default class App extends Component {
       }; break;
       case 1: {
         this.setState({
-          farmer1LastCards: this.reformatCards([]).sort(this.sortRule), 
+          farmer1LastCards: [], 
         });
 
         setTimeout(() => {
@@ -246,7 +253,7 @@ export default class App extends Component {
       }; break;
       case 2: {
         this.setState({
-          farmer2LastCards: this.reformatCards([]).sort(this.sortRule), 
+          farmer2LastCards: [], 
         });
 
         setTimeout(() => {
@@ -676,40 +683,73 @@ export default class App extends Component {
   }
 
   onEnterViewMode = () => {
-    this.setState({ isViewMode: true });
-    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
-    
-    let lastPlayerIdentity = 0;
-    switch(lastIdentity) {
-      case 'farmer1': lastPlayerIdentity = 1; break;
-      case 'farmer2': lastPlayerIdentity = 2; break;
-    }
-
-    axios.post(config.GAME_TABLE_URL, {
-      lordCards: this.formatCards(lordCards),
-      farmer1Cards: this.formatCards(farmer1Cards),
-      farmer2Cards: this.formatCards(farmer2Cards),
-      lastPlayerCards: this.formatCards(lastCards),
-      playerIdentity: 0,
-      lastPlayerIdentity: lastPlayerIdentity,
-    })
-    .then((response) => {
-      const { data } = response;
-      console.log('data: ', data);
-      const { snapshots, status } = data;
-      if (!status) {
-        alert('接口调用失败');
-        return;
-      }
-      if (snapshots.length === 0) {
-        alert("没有自动生成的牌组");
-      } else {
-        this.setState({ snapshots, totalSnapshots: snapshots.length });
-      }
-    })
-    .catch(function (error) {
-      console.log(error);
+    // this.setState({ isViewMode: true });
+    this.setState({ 
+      isViewMode: true,
+      snapshots: [{
+        farmer1_handcard: [52, 22, 39, 71, 56, 72, 41, 57, 44, 60, 61, 77, 30, 62, 78, 1, 2],
+        farmer2_handcard: [19, 36, 68, 37, 54, 70, 23, 40, 25, 73, 58],
+        lord_handcard: [35, 20, 21, 38, 55, 24, 45, 31, 63, 79],
+        result: [35, 20, 21, 38, 55, 24],
+        last_identity: 0,
+        player_identity: 0,
+        last_playcard: [],
+      }, {
+        farmer1_handcard: [52, 22, 39, 71, 56, 72, 41, 57, 44, 60, 61, 77, 30, 62, 78, 1, 2],
+        farmer2_handcard: [19, 36, 68, 37, 54, 70, 23, 40, 25, 73, 58],
+        lord_handcard: [35, 20, 21, 38, 55, 24, 45, 31, 63, 79],
+        result: [52, 22, 39, 71],
+        last_identity: 0,
+        player_identity: 1,
+        last_playcard: [35, 20, 21, 38, 55, 24],
+      }, {
+        farmer1_handcard: [52, 22, 39, 71, 56, 72, 41, 57, 44, 60, 61, 77, 30, 62, 78, 1, 2],
+        farmer2_handcard: [19, 36, 68, 37, 54, 70, 23, 40, 25, 73, 58],
+        lord_handcard: [35, 20, 21, 38, 55, 24, 45, 31, 63, 79],
+        result: [],
+        last_identity: 1,
+        player_identity: 2,
+        last_playcard: [52, 22, 39, 71],
+      }], 
+      totalSnapshots: 3,
+    }, () => {
+      this.onNextSnapshot();
     });
+
+
+    // const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
+    
+    // let lastPlayerIdentity = 0;
+    // switch(lastIdentity) {
+    //   case 'farmer1': lastPlayerIdentity = 1; break;
+    //   case 'farmer2': lastPlayerIdentity = 2; break;
+    // }
+
+    // axios.post(config.GAME_TABLE_URL, {
+    //   lordCards: this.formatCards(lordCards),
+    //   farmer1Cards: this.formatCards(farmer1Cards),
+    //   farmer2Cards: this.formatCards(farmer2Cards),
+    //   lastPlayerCards: this.formatCards(lastCards),
+    //   playerIdentity: 0,
+    //   lastPlayerIdentity: lastPlayerIdentity,
+    // })
+    // .then((response) => {
+    //   const { data } = response;
+    //   console.log('data: ', data);
+    //   const { snapshots, status } = data;
+    //   if (!status) {
+    //     alert('接口调用失败');
+    //     return;
+    //   }
+    //   if (snapshots.length === 0) {
+    //     alert("没有自动生成的牌组");
+    //   } else {
+    //     this.setState({ snapshots, totalSnapshots: snapshots.length });
+    //   }
+    // })
+    // .catch(function (error) {
+    //   console.log(error);
+    // });
   }
 
   onExitViewMode = () => {
@@ -740,6 +780,13 @@ export default class App extends Component {
     return this.deck.filter((card) => cards.includes(card.id));
   }
 
+  handlePageChange = (page) => {
+    this.currentSnapshotIndex = page - 1;
+    this.setState({ currentSnapshotIndex: page - 1})
+    // console.log('page: ', page);
+    this.generateDeckWithPage(page);
+  }
+
   renderLordButtons() {
     const { showButtons, lordLastCards, lordCards, isViewMode } = this.state;
     const showSmartPushButton = showButtons[0];
@@ -761,9 +808,9 @@ export default class App extends Component {
   }
 
   renderPagination() {
-    const { isViewMode, totalSnapshots } = this.state;
+    const { isViewMode, totalSnapshots, currentSnapshotIndex } = this.state;
     if (isViewMode) {
-      return  <Pagination simple defaultCurrent={1} total={totalSnapshots} pageSize={1} />;
+      return  <Pagination simple defaultCurrent={1} total={totalSnapshots} pageSize={1} current={currentSnapshotIndex + 1} onChange={this.handlePageChange}/>;
     }
     return null;
   }
