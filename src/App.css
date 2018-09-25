@@ -68,6 +68,7 @@
 }
 .deck-cards {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   margin-bottom: 15px;
 }
@@ -163,6 +164,7 @@
 }
 .deck {
   cursor: pointer;
+  max-width: 800px;
 }
 .previous-snapshot {
   color: white;

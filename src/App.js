@@ -683,76 +683,57 @@ export default class App extends Component {
   }
 
   onEnterViewMode = () => {
-    // this.setState({ isViewMode: true });
-    this.setState({ 
-      isViewMode: true,
-      snapshots: [{
-        farmer1_handcard: [52, 22, 39, 71, 56, 72, 41, 57, 44, 60, 61, 77, 30, 62, 78, 1, 2],
-        farmer2_handcard: [19, 36, 68, 37, 54, 70, 23, 40, 25, 73, 58],
-        lord_handcard: [35, 20, 21, 38, 55, 24, 45, 31, 63, 79],
-        result: [35, 20, 21, 38, 55, 24],
-        last_identity: 0,
-        player_identity: 0,
-        last_playcard: [],
-      }, {
-        farmer1_handcard: [52, 22, 39, 71, 56, 72, 41, 57, 44, 60, 61, 77, 30, 62, 78, 1, 2],
-        farmer2_handcard: [19, 36, 68, 37, 54, 70, 23, 40, 25, 73, 58],
-        lord_handcard: [35, 20, 21, 38, 55, 24, 45, 31, 63, 79],
-        result: [52, 22, 39, 71],
-        last_identity: 0,
-        player_identity: 1,
-        last_playcard: [35, 20, 21, 38, 55, 24],
-      }, {
-        farmer1_handcard: [52, 22, 39, 71, 56, 72, 41, 57, 44, 60, 61, 77, 30, 62, 78, 1, 2],
-        farmer2_handcard: [19, 36, 68, 37, 54, 70, 23, 40, 25, 73, 58],
-        lord_handcard: [35, 20, 21, 38, 55, 24, 45, 31, 63, 79],
-        result: [],
-        last_identity: 1,
-        player_identity: 2,
-        last_playcard: [52, 22, 39, 71],
-      }], 
-      totalSnapshots: 3,
-    }, () => {
-      this.onNextSnapshot();
-    });
-
-
-    // const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
+    const { lordCards, farmer1Cards, farmer2Cards, lastCards, lastIdentity, deckCards, lordLastCards } = this.state;
     
-    // let lastPlayerIdentity = 0;
-    // switch(lastIdentity) {
-    //   case 'farmer1': lastPlayerIdentity = 1; break;
-    //   case 'farmer2': lastPlayerIdentity = 2; break;
-    // }
+    if (lastCards.length === 0 && lastIdentity !== 'lord') {
+      alert("农民上次出牌不能为空");
+      return;
+    }
+    let lastPlayerIdentity = 0;
+    switch(lastIdentity) {
+      case 'farmer1': lastPlayerIdentity = 1; break;
+      case 'farmer2': lastPlayerIdentity = 2; break;
+    }
 
-    // axios.post(config.GAME_TABLE_URL, {
-    //   lordCards: this.formatCards(lordCards),
-    //   farmer1Cards: this.formatCards(farmer1Cards),
-    //   farmer2Cards: this.formatCards(farmer2Cards),
-    //   lastPlayerCards: this.formatCards(lastCards),
-    //   playerIdentity: 0,
-    //   lastPlayerIdentity: lastPlayerIdentity,
-    // })
-    // .then((response) => {
-    //   const { data } = response;
-    //   console.log('data: ', data);
-    //   const { snapshots, status } = data;
-    //   if (!status) {
-    //     alert('接口调用失败');
-    //     return;
-    //   }
-    //   if (snapshots.length === 0) {
-    //     alert("没有自动生成的牌组");
-    //   } else {
-    //     this.setState({ snapshots, totalSnapshots: snapshots.length });
-    //   }
-    // })
-    // .catch(function (error) {
-    //   console.log(error);
-    // });
+    axios.post(config.GAME_TABLE_URL, {
+      lordCards: this.formatCards(lordCards),
+      farmer1Cards: this.formatCards(farmer1Cards),
+      farmer2Cards: this.formatCards(farmer2Cards),
+      lastPlayerCards: this.formatCards(lastCards),
+      playerIdentity: 0,
+      lastPlayerIdentity: lastPlayerIdentity,
+    })
+    .then((response) => {
+      const { data } = response;
+      const { snapshots, status } = data;
+      if (!status) {
+        alert('接口调用失败');
+        return;
+      }
+      if (snapshots.length === 0) {
+        alert("没有自动生成的牌组");
+      } else {
+        this.currentSnapshotIndex = -1;
+        this.setState({ snapshots, totalSnapshots: snapshots.length, isViewMode: true, currentSnapshotIndex: -1 }, () => {
+          this.onNextSnapshot();
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
   }
 
   onExitViewMode = () => {
+    const { player_identity } = this.state.snapshots[this.currentSnapshotIndex];
+    const { lordCards, lordLastCards, farmer1Cards, farmer1LastCards, farmer2Cards, farmer2LastCards } = this.state;
+    console.log('player_identity: ', player_identity);
+
+    switch(player_identity) {
+      case 0: this.setState({ lordCards: lordCards.concat(lordLastCards) }); break;
+      case 1: this.setState({ farmer1Cards: farmer1Cards.concat(farmer1LastCards) }); break;
+      case 2: this.setState({ farmer2Cards: farmer2Cards.concat(farmer2LastCards) }); break;
+    }
     this.currentSnapshotIndex = 0;
     this.setState({ 
       isViewMode: false, 
