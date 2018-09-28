@@ -138,27 +138,45 @@ export default class App extends Component {
   }
 
   dealCards() {
-    this.deck = shuffle(this.deck)
-    const farmer1Cards = [];
-    const farmer2Cards = [];
-    const lordCards = [];
-    for (let i = 0; i < 51; i++) {
-      switch(i % 3) {
-        case 0: lordCards.push(this.deck[i]); break;
-        case 1: farmer1Cards.push(this.deck[i]); break;
-        case 2: farmer2Cards.push(this.deck[i]); break;
-        default: ;break;
+    axios.get(config.GENERATE_HANDCARD)
+    .then((response) => {
+      const { status, lord_handcard, farmer1_handcard, farmer2_handcard } = response.data;
+      console.log('lord_handcard: ', lord_handcard);
+      if (status) {
+        this.setState({
+          lordCards: this.reformatCards(lord_handcard),
+          farmer1Cards: this.reformatCards(farmer1_handcard),
+          farmer2Cards: this.reformatCards(farmer2_handcard),
+        });
+      } else {
+        alert("获取手牌失败");
+        this.setState({ lordCards: [], farmer1Cards: [], farmer2Cards: [] });
       }
-    }
-    lordCards.push(this.deck[51])
-    lordCards.push(this.deck[52])
-    lordCards.push(this.deck[53])
-
-    this.setState({
-      lordCards,
-      farmer1Cards,
-      farmer2Cards,
+    })
+    .catch(function (error) {
+      console.log(error);
     });
+    // this.deck = shuffle(this.deck)
+    // const farmer1Cards = [];
+    // const farmer2Cards = [];
+    // const lordCards = [];
+    // for (let i = 0; i < 51; i++) {
+    //   switch(i % 3) {
+    //     case 0: lordCards.push(this.deck[i]); break;
+    //     case 1: farmer1Cards.push(this.deck[i]); break;
+    //     case 2: farmer2Cards.push(this.deck[i]); break;
+    //     default: ;break;
+    //   }
+    // }
+    // lordCards.push(this.deck[51])
+    // lordCards.push(this.deck[52])
+    // lordCards.push(this.deck[53])
+
+    // this.setState({
+    //   lordCards,
+    //   farmer1Cards,
+    //   farmer2Cards,
+    // });
   }
 
   onLastSnapshot = () => {
@@ -748,7 +766,7 @@ export default class App extends Component {
     });
   }
 
-  reformatCards(cards) {
+  reformatCards = (cards) => {
     return this.deck.filter((card) => cards.includes(card.id));
   }
 
@@ -854,7 +872,7 @@ export default class App extends Component {
         {farmer1Cards.map((card) => {
           const selectedClass = card.selected ? 'selected' : '';
           return (
-            <div className={`farmer1-card card ${selectedClass}`} onClick={(e) => this.onSelectFarmer1Card(card)}>
+            <div className={`farmer1-card card ${selectedClass}`} onClick={(e) => this.onSelectFarmer1Card(card)} key={card.id}>
               <img className="farmer1-card-img" src={card.image} />
             </div>
           )
@@ -868,7 +886,7 @@ export default class App extends Component {
       <div className="farmer1-last-cards">
         {farmer1LastCards.map((card) => {
           return (
-            <div className="farmer1-last-card card">
+            <div className="farmer1-last-card card" key={card.id} key={card.id}>
               <img className="farmer1-last-card-img" src={card.image} />
             </div>
           )
@@ -883,7 +901,7 @@ export default class App extends Component {
         {farmer2Cards.map((card) => {
           const selectedClass = card.selected ? 'selected' : '';
           return (
-            <div className={`farmer2-card card ${selectedClass}`} onClick={(e) => this.onSelectFarmer2Card(card)}>
+            <div className={`farmer2-card card ${selectedClass}`} onClick={(e) => this.onSelectFarmer2Card(card)} key={card.id}>
               <img className="farmer2-card-img" src={card.image} />
             </div>
           )
@@ -897,7 +915,7 @@ export default class App extends Component {
       <div className="farmer2-last-cards">
         {farmer2LastCards.map((card) => {
           return (
-            <div className="farmer2-last-card card">
+            <div className="farmer2-last-card card" key={card.id}>
               <img className="farmer2-last-card-img" src={card.image} />
             </div>
           )
@@ -912,7 +930,7 @@ export default class App extends Component {
         {lordCards.map((card) => {
           const selectedClass = card.selected ? 'selected' : '';
           return (
-            <div className={`card ${selectedClass}`} onClick={(e) => this.onSelectLordCard(card)}>
+            <div className={`card ${selectedClass}`} onClick={(e) => this.onSelectLordCard(card)} key={card.id}>
               <img src={card.image} />
             </div>
           )
@@ -1004,7 +1022,7 @@ export default class App extends Component {
       <div className="current-player-cards">
         {lordLastCards.map((card) => {
           return (
-            <div className="current-player-card card">
+            <div className="current-player-card card" key={card.id}>
               <img className="current-player-card-img" src={card.image} />
             </div>
           )
@@ -1027,7 +1045,7 @@ export default class App extends Component {
         {deckCards.map((card) => {
           const selectedClass = card.selected ? 'selected' : '';
           return (
-            <div className={`deck-card card ${selectedClass}`} onClick={(e) => this.onSelectDeckCard(card)}>
+            <div className={`deck-card card ${selectedClass}`} onClick={(e) => this.onSelectDeckCard(card)} key={card.id}>
               <img className="deck-card-img" src={card.image} />
             </div>
           )
