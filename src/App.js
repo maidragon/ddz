@@ -216,6 +216,9 @@ export default class App extends Component {
       lastCards: this.reformatCards(last_playcard).sort(this.sortRule),
       lordCards: this.reformatCards(lord_handcard).sort(this.sortRule),
       currentIdentity: identityMaps[player_identity],
+      lordLastCards: [],
+      farmer1LastCards: [],
+      farmer2LastCards: [],
       // deckCards: deckCards.sort(this.sortRule),
     });
 
@@ -227,10 +230,6 @@ export default class App extends Component {
 
     switch(player_identity) {
       case 0: {
-        this.setState({
-          lordLastCards: [], 
-        });
-
         setTimeout(() => {
           this.setState({ 
             lordLastCards: resultCards, 
@@ -240,10 +239,6 @@ export default class App extends Component {
         
       }; break;
       case 1: {
-        this.setState({
-          farmer1LastCards: [], 
-        });
-
         setTimeout(() => {
           this.setState({ 
             farmer1LastCards: resultCards, 
@@ -252,10 +247,6 @@ export default class App extends Component {
         }, 300);
       }; break;
       case 2: {
-        this.setState({
-          farmer2LastCards: [], 
-        });
-
         setTimeout(() => {
           this.setState({ 
             farmer2LastCards: resultCards, 
