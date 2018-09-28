@@ -28,3 +28,6 @@
   /* background-color: #fff; */
   /* border-color: #d9d9d9; */
 }
+.custom-button:focus {
+  outline: none;
+}

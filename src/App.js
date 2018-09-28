@@ -1014,6 +1014,14 @@ export default class App extends Component {
   }
 
   renderDeck = (deckCards) => {
+    const { isViewMode } = this.state;
+    if (isViewMode) {
+      return (
+        <div className="deck-cards">
+          <Button onClick={this.onNextSnapshot}>Play</Button>
+        </div>
+      )
+    }
     return (
       <div className="deck-cards">
         {deckCards.map((card) => {
