@@ -208,7 +208,7 @@ export default class App extends Component {
       "2": "farmer2",
     };
     const { farmer1_handcard, farmer2_handcard, last_identity, last_playcard, lord_handcard, player_identity, result } = snapshot;
-    const deckCards = this.deck.filter((card) => !farmer1_handcard.includes(card.id) && !farmer2_handcard.includes(card.id) && !lord_handcard.includes(card.id));
+    // const deckCards = this.deck.filter((card) => !farmer1_handcard.includes(card.id) && !farmer2_handcard.includes(card.id) && !lord_handcard.includes(card.id));
     this.setState({
       farmer1Cards: this.reformatCards(farmer1_handcard).sort(this.sortRule),
       farmer2Cards: this.reformatCards(farmer2_handcard).sort(this.sortRule),
@@ -216,7 +216,7 @@ export default class App extends Component {
       lastCards: this.reformatCards(last_playcard).sort(this.sortRule),
       lordCards: this.reformatCards(lord_handcard).sort(this.sortRule),
       currentIdentity: identityMaps[player_identity],
-      deckCards: deckCards.sort(this.sortRule),
+      // deckCards: deckCards.sort(this.sortRule),
     });
 
     let resultCards = this.reformatCards(result).sort(this.sortRule);
