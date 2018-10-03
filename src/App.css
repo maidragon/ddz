@@ -131,7 +131,14 @@
   height: 40px;
   position: absolute;
   right: 0;
+  transition: all .2s ease;
   bottom: -2px;
+}
+.farmer1-identity.active,
+.farmer2-identity.active,
+.last-identity.active,
+.lord-identity.active {
+  transform: scale(1.2);
 }
 .last-identity {
   width: 40px;

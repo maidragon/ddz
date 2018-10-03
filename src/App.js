@@ -251,7 +251,7 @@ export default class App extends Component {
         setTimeout(() => {
           this.setState({ 
             lordLastCards: resultCards, 
-            lordCards: this.reformatCards(lord_handcard.filter((card) => !result.includes(card))).sort(this.sortRule) 
+            lordCards: this.reformatCards(lord_handcard.filter((card) => !result.includes(card))).sort(this.sortRule),
           })
         }, 300);
         
@@ -778,13 +778,13 @@ export default class App extends Component {
   }
 
   renderLordButtons() {
-    const { showButtons, lordLastCards, lordCards, isViewMode } = this.state;
+    const { showButtons, lordLastCards, lordCards, isViewMode, currentIdentity } = this.state;
     const showSmartPushButton = showButtons[0];
     const showPutLordCardsToDeckButton = lordCards.filter((card) => card.selected).length > 0;
     const showRedrawLoadCardsButton = lordLastCards.length > 0;
     return (
       <div className="lord-buttons">
-        <img className="lord-identity" src="./Atlas/Identity_Landlord.png" />
+        <img className={`lord-identity ${currentIdentity === 'lord' ? 'active' : '' }`} src="./Atlas/Identity_Landlord.png" />
         <Button onClick={this.onDealLordCards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
         <Button onClick={this.onEnterViewMode} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>生成牌局</Button>
         <Button onClick={this.onExitViewMode} className="small-margin-right" style={{ display: isViewMode ? 'inline-block' : 'none' }}>退出牌局</Button>
@@ -806,13 +806,13 @@ export default class App extends Component {
   }
 
   renderFarmer1Buttons() {
-    const { showButtons, farmer1LastCards, farmer1Cards, isViewMode } = this.state;
+    const { showButtons, farmer1LastCards, farmer1Cards, isViewMode, currentIdentity } = this.state;
     const showSmartPushButton = showButtons[1];
     const showPutFarmer1CardsToDeckButton = farmer1Cards.filter((card) => card.selected).length > 0;
     const showRedrawFarmer1CardsButton = farmer1LastCards.length > 0;
     return (
       <div className="farmer1-buttons">
-        <img className="farmer1-identity" src="./Atlas/Identity_Farmer.png" />
+        <img className={`farmer1-identity ${currentIdentity === 'farmer1' ? 'active' : '' }`} src="./Atlas/Identity_Farmer.png" />
         <Button onClick={this.onDealFarmer1Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
         <Button onClick={this.onSmartFarmer1Cards} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>智能出牌</Button>
         <Button onClick={this.onRedrawFarmer1Cards} className="small-margin-right" style={{ display: showRedrawFarmer1CardsButton && !isViewMode ? 'inline-block' : 'none' }}>放回手牌</Button>
@@ -822,13 +822,13 @@ export default class App extends Component {
   }
 
   renderFarmer2Buttons() {
-    const { showButtons, farmer2LastCards, farmer2Cards, isViewMode } = this.state;
+    const { showButtons, farmer2LastCards, farmer2Cards, isViewMode, currentIdentity } = this.state;
     const showSmartPushButton = showButtons[2];
     const showPutFarmer2CardsToDeckButton = farmer2Cards.filter((card) => card.selected).length > 0;
     const showRedrawFarmer2CardsButton = farmer2LastCards.length > 0;
     return (
       <div className="farmer2-buttons">
-        <img className="farmer2-identity" src="./Atlas/Identity_Farmer.png" />
+        <img className={`farmer2-identity ${currentIdentity === 'farmer2' ? 'active' : '' }`} src="./Atlas/Identity_Farmer.png" />
         <Button onClick={this.onDealFarmer2Cards} className="small-margin-right" style={{ display: 'none'}}>出牌</Button>
         <Button onClick={this.onSmartFarmer2Cards} className="small-margin-right" style={{ display: isViewMode ? 'none' : 'inline-block' }}>智能出牌</Button>
         <Button onClick={this.onRedrawFarmer2Cards} className="small-margin-right" style={{ display: showRedrawFarmer2CardsButton && !isViewMode ? 'inline-block' : 'none' }}>放回手牌</Button>
